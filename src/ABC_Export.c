@@ -14,16 +14,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include "ABC_Export.h"
-#include "ABC_Util.h"
 #include "csv.h"
 
 
 void debugFillData(tABC_TxInfo *data, char *id)
 {
     tABC_TxDetails *pd;
-    
+ 
     const char *fillString = "XOXO";
     
     const char *test_szID = "abc1234";
@@ -34,7 +34,7 @@ void debugFillData(tABC_TxInfo *data, char *id)
     data->szMalleableTxId = calloc(strlen(test_szMID)+1, sizeof(char));
     sprintf(data->szMalleableTxId,"%s", test_szMID);
     
-    int64_t t1 = 1406813560;
+    int64_t t1 = 1406876400; /* 8/1/2014 00:00:00 GMT-7 --> San Diego */
     data->timeCreation = t1;
     
     data->countOutputs = 2;
@@ -222,27 +222,81 @@ exit:
     return cc;
 }
 
-tABC_CC ABC_FilterExportData(const char *szWalletId,
-                             const int szStartDate,
-                             const int szEndDate,
-                             tABC_TxInfo ***pTransactions,
-                             int *iNumOfTransactions,
-                             tABC_Error *pError)
+/**
+ * Gets the transactions associated with the given wallet and filter the transactions in the given time period.
+ *
+ * @param szUserName        UserName for the account associated with the transactions
+ * @param szPassword        Password for the account associated with the transactions
+ * @param szWalletUUID      UUID of the wallet associated with the transactions
+ * @param iStartDate        The earliest date to select transactions in epoch time
+ * @param iEndDate          The latest date to select transactions in epoch time
+ * @param paTransactions    Pointer to store array of transactions info pointers
+ * @param pCount            Pointer to store number of transactions
+ * @param pError            A pointer to the location to store the error if there is one
+ */
+tABC_CC ABC_Export_GetTransactionsByDateRange(const char *szUserName,
+                                              const char *szPassword,
+                                              const char *szWalletUUID,
+                                              const int iStartDate,
+                                              const int iEndDate,
+                                              tABC_TxInfo ***pTransactions,
+                                              int *pCount,
+                                              tABC_Error *pError)
 {
     tABC_CC cc = ABC_CC_Ok;
+    int64_t iCreationTime;
     
-//    tABC_TxInfo **pData = *pTransactions;
+    tABC_TxInfo **pTmpData;
+    int iTmpCount = 1;
+
+    tABC_TxInfo **aTxns = NULL;
+    int iTxnCount = 0;
+
+    /* Retrieve all of the transactions */
+    debugGetTransactions(&pTmpData, &iTmpCount, pError);
+
+    /* Filter all transactions for the given time period for export */
+    for (int i=0; i < iTmpCount; i++)
+    {
+        iCreationTime = pTmpData[i]->timeCreation;
+        
+        if ((iCreationTime >= iStartDate) && (iCreationTime <= iEndDate))
+        {
+            if (aTxns == NULL)
+            {
+                ABC_ALLOC(aTxns, sizeof(tABC_TxInfo *));
+                iTxnCount++;
+            }
+            else
+            {
+                iTxnCount++;
+                ABC_REALLOC(aTxns, sizeof(tABC_TxInfo *) * iTxnCount);
+            }
+            aTxns[iTxnCount-1] = pTmpData[i];
+        }
+    }
     
-    debugGetTransactions(pTransactions, iNumOfTransactions, pError);
-    
+    *pTransactions = aTxns;
+    *pCount = iTxnCount;
+
 exit:
+    ABC_FREE(pTmpData);
     return cc;
 }
 
-tABC_CC ABC_ExportFormatCsv(tABC_TxInfo **pTransactions,
-                            int iTransactionCount,
-                            char **szCsvData,
-                            tABC_Error *pError)
+/**
+ * Create a string of CSV formatted data for the transactions supplied
+ *
+ * @param pTransactions     Pointer to store array of transactions info pointers
+ * @param iTransactionCount Number of transactions in the pTransactions array
+ * @param szCsvData         CSV formatted string of the data passed in the transaction array
+ * @param pError            A pointer to the location to store the error if there is one
+ */
+
+tABC_CC ABC_Export_FormatDataCsv(tABC_TxInfo **pTransactions,
+                                 int iTransactionCount,
+                                 char **szCsvData,
+                                 tABC_Error *pError)
 {
     tABC_CC cc = ABC_CC_Ok;
 
@@ -287,3 +341,6 @@ tABC_CC ABC_ExportFormatCsv(tABC_TxInfo **pTransactions,
 exit:
     return cc;
 }
+
+
+

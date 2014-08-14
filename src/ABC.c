@@ -56,6 +56,7 @@
 #include "ABC_Tx.h"
 #include "ABC_Exchanges.h"
 #include "ABC_Sync.h"
+#include "ABC_Export.h"
 
 static bool gbInitialized = false;
 static tABC_BitCoin_Event_Callback gfAsyncBitCoinEventCallback = NULL;
@@ -2638,3 +2639,31 @@ tABC_CC ABC_Version(char **szVersion, tABC_Error *pError)
 
     return cc;
 }
+
+tABC_CC ABC_FilterTransactionData(const char *szUserName,
+                                  const char *szPassword,
+                                  const char *szWalletUUID,
+                                  const int iStartDate,
+                                  const int iEndDate,
+                                  tABC_TxInfo ***pTransactions,
+                                  int *pCount,
+                                  tABC_Error *pError)
+{
+  tABC_CC cc = ABC_CC_Ok;
+
+exit:
+  return cc; 
+}
+
+
+tABC_CC ABC_FormatCsvData(tABC_TxInfo **pTransactions,
+                          int iTransactionCount,
+                          char **szCsvData,
+                          tABC_Error *pError)
+{
+  tABC_CC cc = ABC_CC_Ok;
+ 
+exit:
+  return cc; 
+}
+
