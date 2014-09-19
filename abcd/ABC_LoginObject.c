@@ -179,6 +179,7 @@ tABC_CC ABC_LoginObjectCreate(const char *szUserName,
     // Upload the sync dir:
     int dirty;
     ABC_CHECK_RET(ABC_LoginObjectSync(pSelf, &dirty, pError));
+    ABC_CHECK_RET(ABC_LoginSyncData(szUserName, szPassword, &dirty, pError));
 
     // Latch the account:
     ABC_CHECK_RET(ABC_LoginServerActivate(pSelf->L1, pSelf->LP1, pError));
@@ -313,7 +314,6 @@ tABC_CC ABC_LoginObjectSync(tABC_LoginObject *pSelf,
 
     char            *szCarePackage  = NULL;
     char            *szLoginPackage = NULL;
-    tABC_SyncKeys   *pKeys          = NULL;
 
     // Create the directory if it does not exist:
     if (pSelf->AccountNum < 0)
@@ -327,14 +327,9 @@ tABC_CC ABC_LoginObjectSync(tABC_LoginObject *pSelf,
         ABC_CHECK_RET(ABC_LoginDirGetNumber(pSelf->szUserName, &pSelf->AccountNum, pError));
     }
 
-    // Now do the sync:
-    ABC_CHECK_RET(ABC_LoginObjectGetSyncKeys(pSelf, &pKeys, pError));
-    ABC_CHECK_RET(ABC_SyncRepo(pKeys->szSyncDir, pKeys->szSyncKey, pDirty, pError));
-
 exit:
     ABC_FREE_STR(szCarePackage);
     ABC_FREE_STR(szLoginPackage);
-    if (pKeys)          ABC_SyncFreeKeys(pKeys);
     return cc;
 }
 
