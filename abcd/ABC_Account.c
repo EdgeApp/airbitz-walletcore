@@ -39,6 +39,8 @@
 #define JSON_ACCT_LABEL_TYPE                    "labeltype"
 #define JSON_ACCT_SATOSHI_FIELD                 "satoshi"
 #define JSON_ACCT_ADVANCED_FEATURES_FIELD       "advancedFeatures"
+#define JSON_ACCT_DAILY_SPEND_LIMIT_ENABLED     "dailySpendLimitEnabled"
+#define JSON_ACCT_DAILY_SPEND_LIMIT_SATOSHIS    "dailySpendLimitSatoshis"
 
 // Wallet JSON fields:
 #define JSON_ACCT_WALLET_MK_FIELD               "MK"
@@ -393,6 +395,28 @@ tABC_CC ABC_AccountSettingsLoad(tABC_SyncKeys *pKeys,
         pJSON_Value = json_object_get(pJSON_Root, JSON_ACCT_ADVANCED_FEATURES_FIELD);
         ABC_CHECK_ASSERT((pJSON_Value && json_is_boolean(pJSON_Value)), ABC_CC_JSONError, "Error parsing JSON boolean value");
         pSettings->bAdvancedFeatures = json_is_true(pJSON_Value) ? true : false;
+
+        pJSON_Value = json_object_get(pJSON_Root, JSON_ACCT_DAILY_SPEND_LIMIT_ENABLED);
+        if (pJSON_Value)
+        {
+            ABC_CHECK_ASSERT((pJSON_Value && json_is_boolean(pJSON_Value)), ABC_CC_JSONError, "Error parsing JSON boolean value");
+            pSettings->bDailySpendLimit = json_is_true(pJSON_Value) ? true : false;
+        }
+        else
+        {
+            pSettings->bDailySpendLimit = false;
+        }
+
+        pJSON_Value = json_object_get(pJSON_Root, JSON_ACCT_DAILY_SPEND_LIMIT_SATOSHIS);
+        if (pJSON_Value)
+        {
+            ABC_CHECK_ASSERT((pJSON_Value && json_is_integer(pJSON_Value)), ABC_CC_JSONError, "Error parsing JSON daily spend satoshi value");
+            pSettings->dailySpendLimitSatoshis = (int64_t) json_integer_value(pJSON_Value);
+        }
+        else
+        {
+            pSettings->dailySpendLimitSatoshis = 0;
+        }
 
         // get the denomination object
         json_t *pJSON_Denom = json_object_get(pJSON_Root, JSON_ACCT_BITCOIN_DENOMINATION_FIELD);
