@@ -36,6 +36,7 @@
  */
 
 #include "ABC.h"
+#include "ABC_LoginPin.h"
 #include "ABC_LoginShim.h"
 #include "ABC_LoginRequest.h"
 #include "ABC_LoginServer.h"
@@ -814,6 +815,72 @@ tABC_CC ABC_CheckRecoveryAnswers(const char *szUserName,
     ABC_CHECK_RET(ABC_LoginShimCheckRecovery(szUserName, szRecoveryAnswers, pbValid, pError));
 
 exit:
+
+    return cc;
+}
+
+/**
+ * Determines whether or not a PIN-based login pagage exists for the given
+ * user.
+ */
+tABC_CC ABC_PinLoginExists(const char *szUserName,
+                           bool *pbExists,
+                           tABC_Error *pError)
+{
+    ABC_DebugLog("%s called", __FUNCTION__);
+
+    tABC_CC cc = ABC_CC_Ok;
+    ABC_SET_ERR_CODE(pError, ABC_CC_Ok);
+
+    ABC_CHECK_ASSERT(true == gbInitialized, ABC_CC_NotInitialized, "The core library has not been initalized");
+
+    ABC_CHECK_RET(ABC_LoginPinExists(szUserName, pbExists, pError));
+
+exit:
+    return cc;
+}
+
+/**
+ * Performs a PIN-based login for the given user.
+ */
+tABC_CC ABC_PinLogin(const char *szUserName,
+                     const char *szPIN,
+                     tABC_Error *pError)
+{
+    ABC_DebugLog("%s called", __FUNCTION__);
+
+    tABC_CC cc = ABC_CC_Ok;
+    ABC_SET_ERR_CODE(pError, ABC_CC_Ok);
+
+    ABC_CHECK_ASSERT(true == gbInitialized, ABC_CC_NotInitialized, "The core library has not been initalized");
+
+    ABC_CHECK_RET(ABC_LoginShimPinLogin(szUserName, szPIN, pError));
+
+exit:
+    return cc;
+}
+
+/**
+ * Sets up the data for a pin-based login, both on disk and on the server.
+ */
+tABC_CC ABC_PinSetup(const char *szUserName,
+                     const char *szPassword,
+                     tABC_Error *pError)
+{
+    ABC_DebugLog("%s called", __FUNCTION__);
+
+    tABC_CC cc = ABC_CC_Ok;
+    ABC_SET_ERR_CODE(pError, ABC_CC_Ok);
+
+    char *szPIN = NULL;
+
+    ABC_CHECK_ASSERT(true == gbInitialized, ABC_CC_NotInitialized, "The core library has not been initalized");
+
+    ABC_CHECK_RET(ABC_GetPIN(szUserName, szPassword, &szPIN, pError));
+    ABC_CHECK_RET(ABC_LoginShimPinSetup(szUserName, szPassword, szPIN, pError));
+
+exit:
+    ABC_FREE_STR(szPIN);
 
     return cc;
 }
