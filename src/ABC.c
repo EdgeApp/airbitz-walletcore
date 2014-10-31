@@ -221,7 +221,6 @@ tABC_CC ABC_SignIn(const char *szUserName,
                                                   szPassword,
                                                   NULL, // recovery questions
                                                   NULL, // recovery answers
-                                                  NULL, // PIN
                                                   NULL, // new password
                                                   fRequestCallback,
                                                   pData,
@@ -257,7 +256,6 @@ exit:
  */
 tABC_CC ABC_CreateAccount(const char *szUserName,
                           const char *szPassword,
-                          const char *szPIN,
                           tABC_Request_Callback fRequestCallback,
                           void *pData,
                           tABC_Error *pError)
@@ -272,9 +270,6 @@ tABC_CC ABC_CreateAccount(const char *szUserName,
     ABC_CHECK_ASSERT(strlen(szUserName) >= ABC_MIN_USERNAME_LENGTH, ABC_CC_Error, "Username too short");
     ABC_CHECK_NULL(szPassword);
     ABC_CHECK_ASSERT(strlen(szPassword) > 0, ABC_CC_Error, "No password provided");
-    ABC_CHECK_NULL(szPIN);
-    ABC_CHECK_ASSERT(strlen(szPIN) >= ABC_MIN_PIN_LENGTH, ABC_CC_Error, "PIN is too short");
-    ABC_CHECK_NUMERIC(szPIN, ABC_CC_NonNumericPin, "The pin must be numeric.");
 
     if (fRequestCallback)
     {
@@ -286,7 +281,6 @@ tABC_CC ABC_CreateAccount(const char *szUserName,
                                                   szPassword,
                                                   NULL, // recovery questions
                                                   NULL, // recovery answers
-                                                  szPIN,
                                                   NULL, // new password
                                                   fRequestCallback,
                                                   pData,
@@ -300,7 +294,6 @@ tABC_CC ABC_CreateAccount(const char *szUserName,
     else
     {
         ABC_CHECK_RET(ABC_LoginShimNewAccount(szUserName, szPassword, pError));
-        ABC_CHECK_RET(ABC_SetPIN(szUserName, szPassword, szPIN, pError));
     }
 
 exit:
@@ -355,7 +348,6 @@ tABC_CC ABC_SetAccountRecoveryQuestions(const char *szUserName,
                                                   szPassword,
                                                   szRecoveryQuestions,
                                                   szRecoveryAnswers,
-                                                  NULL, // PIN
                                                   NULL, // new password
                                                   fRequestCallback,
                                                   pData,
@@ -1116,7 +1108,6 @@ exit:
  * @param szUserName                UserName for the account
  * @param szPassword                Password for the account
  * @param szNewPassword             New Password for the account
- * @param szDeprecated              This used to be the PIN, but is no longer used
  * @param fRequestCallback          The function that will be called when the password change has finished.
  * @param pData                     Pointer to data to be returned back in callback
  * @param pError                    A pointer to the location to store the error if there is one
@@ -1124,7 +1115,6 @@ exit:
 tABC_CC ABC_ChangePassword(const char *szUserName,
                            const char *szPassword,
                            const char *szNewPassword,
-                           const char *szDeprecated,
                            tABC_Request_Callback fRequestCallback,
                            void *pData,
                            tABC_Error *pError)
@@ -1152,7 +1142,6 @@ tABC_CC ABC_ChangePassword(const char *szUserName,
                                                   szPassword,
                                                   NULL, // recovery questions
                                                   NULL, // recovery answers
-                                                  NULL, // PIN
                                                   szNewPassword,
                                                   fRequestCallback,
                                                   pData,
@@ -1185,7 +1174,6 @@ exit:
  * @param szUserName                UserName for the account
  * @param szRecoveryAnswers         Recovery answers (each answer seperated by a newline)
  * @param szNewPassword             New Password for the account
- * @param szDeprecated              This used to be the PIN, but is no longer used
  * @param fRequestCallback          The function that will be called when the password change has finished.
  * @param pData                     Pointer to data to be returned back in callback
  * @param pError                    A pointer to the location to store the error if there is one
@@ -1193,7 +1181,6 @@ exit:
 tABC_CC ABC_ChangePasswordWithRecoveryAnswers(const char *szUserName,
                                               const char *szRecoveryAnswers,
                                               const char *szNewPassword,
-                                              const char *szDeprecated,
                                               tABC_Request_Callback fRequestCallback,
                                               void *pData,
                                               tABC_Error *pError)
@@ -1221,7 +1208,6 @@ tABC_CC ABC_ChangePasswordWithRecoveryAnswers(const char *szUserName,
                                                   NULL, // recovery questions
                                                   NULL, // password
                                                   szRecoveryAnswers,
-                                                  NULL,
                                                   szNewPassword,
                                                   fRequestCallback,
                                                   pData,

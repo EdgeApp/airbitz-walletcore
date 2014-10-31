@@ -1,3 +1,4 @@
+
 /**
  * @file
  * Pthread-compatible wrappers around long-running login functions.
@@ -27,7 +28,6 @@ tABC_CC ABC_LoginRequestInfoAlloc(tABC_LoginRequestInfo **ppAccountRequestInfo,
                                     const char *szPassword,
                                     const char *szRecoveryQuestions,
                                     const char *szRecoveryAnswers,
-                                    const char *szPIN,
                                     const char *szNewPassword,
                                     tABC_Request_Callback fRequestCallback,
                                     void *pData,
@@ -60,11 +60,6 @@ tABC_CC ABC_LoginRequestInfoAlloc(tABC_LoginRequestInfo **ppAccountRequestInfo,
         ABC_STRDUP(pAccountRequestInfo->szRecoveryAnswers, szRecoveryAnswers);
     }
 
-    if (NULL != szPIN)
-    {
-        ABC_STRDUP(pAccountRequestInfo->szPIN, szPIN);
-    }
-
     if (NULL != szNewPassword)
     {
         ABC_STRDUP(pAccountRequestInfo->szNewPassword, szNewPassword);
@@ -95,8 +90,6 @@ void ABC_LoginRequestInfoFree(tABC_LoginRequestInfo *pAccountRequestInfo)
         ABC_FREE_STR(pAccountRequestInfo->szRecoveryQuestions);
 
         ABC_FREE_STR(pAccountRequestInfo->szRecoveryAnswers);
-
-        ABC_FREE_STR(pAccountRequestInfo->szPIN);
 
         ABC_FREE_STR(pAccountRequestInfo->szNewPassword);
 
@@ -131,10 +124,6 @@ void *ABC_LoginRequestThreaded(void *pData)
         {
             // create the account
             CC = ABC_LoginShimNewAccount(pInfo->szUserName, pInfo->szPassword, &(results.errorInfo));
-
-            // hack to set pin:
-            tABC_Error error;
-            ABC_SetPIN(pInfo->szUserName, pInfo->szPassword, pInfo->szPIN, &error);
         }
         else if (ABC_RequestType_AccountSignIn == pInfo->requestType)
         {

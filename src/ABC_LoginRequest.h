@@ -36,9 +36,6 @@ extern "C" {
         /** recovery answers (not used in all requests) */
         char        *szRecoveryAnswers;
 
-        /** account PIN for create account requests */
-        char        *szPIN;
-
         /** new password for password change request */
         char        *szNewPassword;
 
@@ -55,7 +52,6 @@ extern "C" {
                                         const char *szPassword,
                                         const char *szRecoveryQuestions,
                                         const char *szRecoveryAnswers,
-                                        const char *szPIN,
                                         const char *szNewPassword,
                                         tABC_Request_Callback fRequestCallback,
                                         void *pData,
